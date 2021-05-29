@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 11 13:20:55 2021
+
+@author: Ragnar Dzosua Builong Jonsson
+"""
+
+# Python script to process ALD data.
+
+# Delete all the text above the first line of value and save as .txt in the python folder
+# Run the program with the name of the file ex. Read_ALD_Data('RD210126.txt')
+
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+import pandas as pnd
+from datetime import date
+import seaborn as sns
+sns.set()
+
+from time import sleep
+from progressbar import progressbar
+
+
+    
+def Read_ALD_Data(datafl):
+    
+    f = open('Run_'+str(datafl),'w+') #Create a new database with name Run_"datafl".txt
+    f.write('Time\tReact pressure\tSublimator pressure\tO2\tAr_purge\tAr_carrier\tReactor Temp\tLine 1\tLine 2\tShower Temp\n') #Seperate Columns
+    data = open(datafl, 'r') #Read the ALD data from the .txt file
+
+    #Function to calculate the time for each line
+    def Time_Calc(X):
+        time = X.split(' ')[2]
+        Hour = int(time.split(':')[0])
+        Min = int(time.split(':')[1])
+        Sec = int((time.split(':')[2]).split('.')[0])
+        mSec = int(time.split('.')[-1])
+        Time = Hour*60 + Min + Sec/60 + mSec/3600
+        return(Time)
+    
+
+    m = 0
+    Reactpr = []
+    O2 = []
+    Ar_purge = []
+    Ar_carrier = []
+    Sublpr = []
+    T1 = []
+    T2 = []
+    T3 = []
+    T4 = []
+    Line = (data.read()).split('\n')
+    Beg_T = Time_Calc(Line[0]) #Beg_T used to make the data start at T = 0
+    
+#Runs over each line of the raw txt file and seperates the values into the correct variables
+    for n in progressbar(range(len(Line))):
+        if Line[n].split(' ')[0] == '1':
+            Reactpr.append(float((Line[n]).split(' ')[3]))
+            T = Time_Calc(Line[n])
+            T = T-Beg_T
+        elif Line[n].split(' ')[0] == '2':
+            T1.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '3':
+            O2.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '4':
+            Ar_purge.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '5':
+            Ar_carrier.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '6':
+            Sublpr.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '7':
+            T4.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '8':
+            T2.append(float((Line[n]).split(' ')[3]))
+        elif Line[n].split(' ')[0] == '9':
+            T3.append(float((Line[n]).split(' ')[3]))
+            #Writes each column into a new .txt file 
+            f.write(str(T)+'\t'+str(Reactpr[m])+'\t'+str(Sublpr[m])+'\t'+str(O2[m])+'\t'+str(Ar_purge[m])+'\t'+str(Ar_carrier[m])+'\t'+str(T1[m])+'\t'+str(T2[m])+'\t'+str(T3[m])+'\t'+str(T4[m])+'\n')
+            m = m+1
+            
+        
+                 
